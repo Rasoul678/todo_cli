@@ -17,8 +17,8 @@ async fn main() {
         Commands::Add { title, description } => {
             add_task(&client, title, description).await.ok();
         }
-        Commands::List => {
-            list_tasks(&client).await.ok();
+        Commands::List { is_completed } => {
+            list_tasks(&client, is_completed).await.ok();
         }
         Commands::Complete { id } => {
             complete_task(&client, id).await.ok();

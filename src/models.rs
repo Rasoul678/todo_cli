@@ -43,7 +43,7 @@ pub enum Commands {
         description: Option<String>,
     },
     /// List all tasks
-    List,
+    List { is_completed: Option<bool> },
     /// Mark a task as completed
     Complete {
         /// ID of the task to mark as completed
@@ -81,14 +81,23 @@ impl SupabaseClient {
         self.client
             .post(&format!("{}/rest/v1/tasks", self.supabase_url))
             .header("apikey", &self.api_key)
+            .header("Prefer", "return=representation")
             .json(&task)
             .send()
             .await
     }
 
-    pub async fn get(&self) -> reqwest::Result<reqwest::Response> {
+    pub async fn get(&self, is_completed: Option<bool>) -> reqwest::Result<reqwest::Response> {
+        let url = match is_completed {
+            Some(completed) => format!(
+                "{}/rest/v1/tasks?is_completed=eq.{}",
+                self.supabase_url, completed
+            ),
+            None => format!("{}/rest/v1/tasks", self.supabase_url),
+        };
+
         self.client
-            .get(&format!("{}/rest/v1/tasks", self.supabase_url))
+            .get(url)
             .header("apikey", &self.api_key)
             .send()
             .await
